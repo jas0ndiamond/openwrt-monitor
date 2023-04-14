@@ -22,6 +22,9 @@ RUN /usr/bin/apt-get -y install grafana
 #os setup for influxdb
 RUN /usr/bin/apt-get -y install influxdb influxdb-client
 
+#rsyslog and logrotate
+RUN /usr/bin/apt-get -y install rsyslog logrotate
+
 #debug tools
 RUN /usr/bin/apt-get -y install nano vim telnet less
 
@@ -39,6 +42,9 @@ EXPOSE 28086
 
 #grafana http port
 EXPOSE 20000
+
+#expose rsyslog tcp port
+EXPOSE 514
 
 
 ################
@@ -61,7 +67,15 @@ COPY grafana.ini /etc/grafana/grafana.ini
 
 RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/grafana-server
 
-#CMD /etc/init.d/grafana-server enable
+#################
+#deploy configured rsyslog
+
+COPY rsyslog.conf /etc/rsyslog.conf
+
+#################
+#deploy configured logrotate
+
+COPY logrotate.conf /etc/logrotate.conf
 
 ################
 #run start.sh as the container entrypoint

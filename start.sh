@@ -1,15 +1,15 @@
 #!/bin/bash
 
-echo "Starting influxdb..."
+echo "Starting openwrt-monitor..."
 
+#mostly sure this sleep is necessary
 sleep 10
 
-#seeing errors here but the database is up
-#need to explicitly start the influxdb service with '/usr/sbin/service influxdb start'
-#TODO: figure this out
+echo "Starting influxdb..."
 /usr/sbin/service influxdb start &> /dev/null
 
-#echo $(/bin/ps -ef |grep influx | grep -v grep)
+#buy time for the database to start up - necessary
+sleep 5
 
 #TODO: check if the database exists and only create OPENWRT_MON if it doesn't
 /usr/bin/influx -execute 'CREATE DATABASE "OPENWRT_MON"'
@@ -23,10 +23,19 @@ echo "Starting grafana-server..."
 #seeing errors here but the grafana ui is up
 #need to explicitly start the grafana service with '/usr/sbin/service grafana-server start'
 #TODO: figure this out
+#/etc/init.d/grafana-server enable
+
 /usr/sbin/service grafana-server start &> /dev/null
 
-#echo $(/bin/ps -ef |grep grafana | grep -v grep)
 
+#logrotate is a cronjob (not a service) 
+#configured as /etc/cron.daily/logrotate by default
+
+echo "Starting rsyslog..."
+
+/usr/sbin/service rsyslog start &> /dev/null
+
+echo "================="
 echo "openwrt-monitor running..."
 
 sleep infinity
